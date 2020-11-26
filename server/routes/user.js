@@ -7,28 +7,35 @@ const User = require('../models/user');
 const app = express();
 const saltRounds = 10;
 
+const errorStatus = ( error ) => {
+    if ( error ) {
+        return res.status( 400 ).json({
+            ok: false,
+            error
+        });
+    }
+};
+
 app.get( '/user', ( req, res ) => {
 
     let skip = +req.query.skip || 0;
     let limit = +req.query.limit || 0;
 
-    User.find({})
+    User.find({ status: true }, 'name email role status google')
         .skip( skip )
         .limit( limit )
         .exec( ( err, users ) =>{
-            if ( err ) {
-                return res.status( 400 ).json({
-                    ok: false,
-                    err
-                });
-            }
 
-            res.json({
-                ok: true,
-                users
-            })
-        })
+            errorStatus( err );
 
+            User.countDocuments({ status: true }, ( err, count ) => {
+                res.json({
+                    ok: true,
+                    users,
+                    count
+                })
+            });
+        });
 });
 
 app.post( '/user', ( req, res ) => {
@@ -44,34 +51,16 @@ app.post( '/user', ( req, res ) => {
     });
 
     user.save((err, userDB) => {
-        if ( err ) {
-            return res.status( 400 ).json({
-                ok: false,
-                err
-            });
-        }
+
+        errorStatus( err );
 
         // user.password = null // No permite no mostrar el hash de contraseña al crear el usuario.
 
         res.json({
             ok: true,
             user: userDB
-        })
-    })
-
-    // if ( body.nombre === undefined ) {
-
-    //     res.status( 400 ).json({
-    //         ok: false,
-    //         message: 'Name is required.'
-    //     })
-
-    // } else {
-    //     res.json({
-    //         person: body
-    //     });
-    // };
-
+        });
+    });
 });
 
 app.put( '/user/:id', ( req, res ) => {
@@ -79,14 +68,9 @@ app.put( '/user/:id', ( req, res ) => {
     let id = req.params.id;
     let body = _.pick( req.body, ['name', 'email', 'img', 'role', 'status'] );
 
-    User.findByIdAndUpdate(id, body, { new: true, runValidators: true }, ( err, userDB ) =>{
+    User.findByIdAndUpdate(id, body, { new: true, runValidators: true }, ( err, userDB ) => {
 
-        if ( err ) {
-            return res.status( 400 ).json({
-                ok: false,
-                err
-            });
-        }
+        errorStatus( err );
 
         res.json({
             ok: true,
@@ -95,8 +79,34 @@ app.put( '/user/:id', ( req, res ) => {
     })
 });
 
-app.delete( '/user', ( req, res ) => {
-    res.json( 'delete user' );
+app.delete( '/user/:id', ( req, res ) => {
+
+    let id = req.params.id;
+
+    // User.findByIdAndRemove(id, ( err, userDeleted ) => {
+
+    let changeStatus = {
+        status: false
+    }
+
+    User.findByIdAndUpdate(id, changeStatus, { new: true }, ( err, userDeleted ) => {
+
+        errorStatus( err );
+
+        if ( !userDeleted ) {
+            return res.status( 400 ).json({
+                ok: false,
+                err: {
+                    message: 'User not found...'
+                }
+            });
+        }
+
+        res.json({
+            ok: true,
+            user: userDeleted
+        });
+    });
 });
 
 module.exports = app;
