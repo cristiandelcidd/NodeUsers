@@ -3,9 +3,9 @@ const bcrypt = require('bcrypt');
 const _ = require('underscore');
 
 const User = require('../models/user');
+const { verifyToken } = require('../middlewares/auth');
 
 const app = express();
-const saltRounds = 10;
 
 const errorStatus = ( error ) => {
     if ( error ) {
@@ -16,7 +16,13 @@ const errorStatus = ( error ) => {
     }
 };
 
-app.get( '/user', ( req, res ) => {
+app.get( '/user', verifyToken, ( req, res ) => {
+
+    return res.json({
+        user: req.user,
+        name: req.user.name,
+        email: req.user.email
+    })
 
     let skip = +req.query.skip || 0;
     let limit = +req.query.limit || 0;
@@ -38,9 +44,10 @@ app.get( '/user', ( req, res ) => {
         });
 });
 
-app.post( '/user', ( req, res ) => {
+app.post( '/user', verifyToken, ( req, res ) => {
 
     let body = req.body;
+    const saltRounds = 10;
 
     let user = new User({
         name: body.name,
@@ -63,7 +70,7 @@ app.post( '/user', ( req, res ) => {
     });
 });
 
-app.put( '/user/:id', ( req, res ) => {
+app.put( '/user/:id', verifyToken, ( req, res ) => {
 
     let id = req.params.id;
     let body = _.pick( req.body, ['name', 'email', 'img', 'role', 'status'] );
@@ -79,7 +86,7 @@ app.put( '/user/:id', ( req, res ) => {
     })
 });
 
-app.delete( '/user/:id', ( req, res ) => {
+app.delete( '/user/:id', verifyToken, ( req, res ) => {
 
     let id = req.params.id;
 
