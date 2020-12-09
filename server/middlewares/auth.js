@@ -3,9 +3,9 @@ const jwt = require('jsonwebtoken');
 // Verify Token
 // =====================
 
-let verifyToken = ( req, res, next ) => {
+const verifyToken = ( req, res, next ) => {
 
-    let token = req.get('token'); // Header en nuestras peticiones
+    const token = req.get('token'); // Header en nuestras peticiones
 
     jwt.verify( token, process.env.SEED, ( err, decoded ) => {
         if ( err ) {
@@ -20,6 +20,28 @@ let verifyToken = ( req, res, next ) => {
     });
 };
 
+// =====================
+// Verify ADMIN_ROLE
+// =====================
+
+const verifyAdminRole = ( req, res, next ) => {
+
+    let user = req.user;
+
+    if ( user.role === 'ADMIN_ROLE' ) {
+        next();
+        return;
+    }
+
+    return res.json({
+        ok: false,
+            err: {
+                message: 'User must be an administrator.'
+            }
+    });
+};
+
 module.exports = {
-    verifyToken
+    verifyToken,
+    verifyAdminRole
 };

@@ -3,26 +3,26 @@ const bcrypt = require('bcrypt');
 const _ = require('underscore');
 
 const User = require('../models/user');
-const { verifyToken } = require('../middlewares/auth');
+const { verifyToken, verifyAdminRole } = require('../middlewares/auth');
 
 const app = express();
 
-const errorStatus = ( error ) => {
-    if ( error ) {
-        return res.status( 400 ).json({
-            ok: false,
-            error
-        });
-    }
-};
+// const errorStatus = ( error, res ) => {
+//     if ( error ) {
+//         return res.status( 400 ).json({
+//             ok: false,
+//             error
+//         });
+//     }
+// };
 
 app.get( '/user', verifyToken, ( req, res ) => {
 
-    return res.json({
-        user: req.user,
-        name: req.user.name,
-        email: req.user.email
-    })
+    // return res.json({
+    //     user: req.user,
+    //     name: req.user.name,
+    //     email: req.user.email
+    // })
 
     let skip = +req.query.skip || 0;
     let limit = +req.query.limit || 0;
@@ -32,7 +32,13 @@ app.get( '/user', verifyToken, ( req, res ) => {
         .limit( limit )
         .exec( ( err, users ) =>{
 
-            errorStatus( err );
+            // errorStatus( err, res );
+            if ( err ) {
+                return res.status( 400 ).json({
+                    ok: false,
+                    err
+                });
+            }
 
             User.countDocuments({ status: true }, ( err, count ) => {
                 res.json({
@@ -44,7 +50,7 @@ app.get( '/user', verifyToken, ( req, res ) => {
         });
 });
 
-app.post( '/user', verifyToken, ( req, res ) => {
+app.post( '/user', [ verifyToken, verifyAdminRole ], ( req, res ) => {
 
     let body = req.body;
     const saltRounds = 10;
@@ -59,7 +65,13 @@ app.post( '/user', verifyToken, ( req, res ) => {
 
     user.save((err, userDB) => {
 
-        errorStatus( err );
+        // errorStatus( err, res );
+        if ( err ) {
+            return res.status( 400 ).json({
+                ok: false,
+                err
+            });
+        }
 
         // user.password = null // No permite no mostrar el hash de contraseña al crear el usuario.
 
@@ -70,14 +82,20 @@ app.post( '/user', verifyToken, ( req, res ) => {
     });
 });
 
-app.put( '/user/:id', verifyToken, ( req, res ) => {
+app.put( '/user/:id', [ verifyToken, verifyAdminRole ], ( req, res ) => {
 
     let id = req.params.id;
     let body = _.pick( req.body, ['name', 'email', 'img', 'role', 'status'] );
 
     User.findByIdAndUpdate(id, body, { new: true, runValidators: true }, ( err, userDB ) => {
 
-        errorStatus( err );
+        // errorStatus( err, res );
+        if ( err ) {
+            return res.status( 400 ).json({
+                ok: false,
+                err
+            });
+        }
 
         res.json({
             ok: true,
@@ -86,7 +104,7 @@ app.put( '/user/:id', verifyToken, ( req, res ) => {
     })
 });
 
-app.delete( '/user/:id', verifyToken, ( req, res ) => {
+app.delete( '/user/:id', [ verifyToken, verifyAdminRole ], ( req, res ) => {
 
     let id = req.params.id;
 
@@ -98,7 +116,13 @@ app.delete( '/user/:id', verifyToken, ( req, res ) => {
 
     User.findByIdAndUpdate(id, changeStatus, { new: true }, ( err, userDeleted ) => {
 
-        errorStatus( err );
+        // errorStatus( err, res );
+        if ( err ) {
+            return res.status( 400 ).json({
+                ok: false,
+                err
+            });
+        }
 
         if ( !userDeleted ) {
             return res.status( 400 ).json({
