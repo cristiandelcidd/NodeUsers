@@ -7,7 +7,8 @@
     "node": "15.0.1"
   },
   "scripts": {
-    "start": "nodemon server/index"
+    "start": "node server/index",
+    "dev": "nodemon server/index"
   },
   "dependencies": {
     "bcrypt": "^5.0.0",
