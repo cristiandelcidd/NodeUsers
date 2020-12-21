@@ -7,32 +7,16 @@ const { verifyToken, verifyAdminRole } = require('../middlewares/auth');
 
 const app = express();
 
-// const errorStatus = ( error, res ) => {
-//     if ( error ) {
-//         return res.status( 400 ).json({
-//             ok: false,
-//             error
-//         });
-//     }
-// };
-
 app.get( '/user', verifyToken, ( req, res ) => {
 
-    // return res.json({
-    //     user: req.user,
-    //     name: req.user.name,
-    //     email: req.user.email
-    // })
-
-    let skip = +req.query.skip || 0;
-    let limit = +req.query.limit || 0;
+    const skip = +req.query.skip || 0;
+    const limit = +req.query.limit || 0;
 
     User.find({ status: true }, 'name email role status google')
         .skip( skip )
         .limit( limit )
         .exec( ( err, users ) =>{
 
-            // errorStatus( err, res );
             if ( err ) {
                 return res.status( 400 ).json({
                     ok: false,
@@ -52,10 +36,10 @@ app.get( '/user', verifyToken, ( req, res ) => {
 
 app.post( '/user', [ verifyToken, verifyAdminRole ], ( req, res ) => {
 
-    let body = req.body;
+    const body = req.body;
     const saltRounds = 10;
 
-    let user = new User({
+    const user = new User({
         name: body.name,
         email: body.email,
         password: bcrypt.hashSync(body.password, saltRounds), // Hace la encriptacion sin el uso de promesas o callbacks.
@@ -65,7 +49,6 @@ app.post( '/user', [ verifyToken, verifyAdminRole ], ( req, res ) => {
 
     user.save((err, userDB) => {
 
-        // errorStatus( err, res );
         if ( err ) {
             return res.status( 400 ).json({
                 ok: false,
@@ -84,12 +67,11 @@ app.post( '/user', [ verifyToken, verifyAdminRole ], ( req, res ) => {
 
 app.put( '/user/:id', [ verifyToken, verifyAdminRole ], ( req, res ) => {
 
-    let id = req.params.id;
-    let body = _.pick( req.body, ['name', 'email', 'img', 'role', 'status'] );
+    const id = req.params.id;
+    const body = _.pick( req.body, ['name', 'email', 'img', 'role', 'status'] );
 
     User.findByIdAndUpdate(id, body, { new: true, runValidators: true }, ( err, userDB ) => {
 
-        // errorStatus( err, res );
         if ( err ) {
             return res.status( 400 ).json({
                 ok: false,
@@ -106,11 +88,9 @@ app.put( '/user/:id', [ verifyToken, verifyAdminRole ], ( req, res ) => {
 
 app.delete( '/user/:id', [ verifyToken, verifyAdminRole ], ( req, res ) => {
 
-    let id = req.params.id;
+    const id = req.params.id;
 
-    // User.findByIdAndRemove(id, ( err, userDeleted ) => {
-
-    let changeStatus = {
+    const changeStatus = {
         status: false
     }
 

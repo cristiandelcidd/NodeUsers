@@ -7,9 +7,9 @@ const validsRoles = {
 };
 
 // const { Schema } = mongoose;
-let Schema = mongoose.Schema;
+const Schema = mongoose.Schema;
 
-let userSchema = new Schema({
+const userSchema = new Schema({
     name: {
         type: String,
         required: [ true, 'Name is required.' ]
@@ -42,8 +42,8 @@ let userSchema = new Schema({
 });
 
 userSchema.methods.toJSON = function() {
-    let user = this;
-    let userObject = user.toObject();
+    const user = this;
+    const userObject = user.toObject();
     delete userObject.password;
 
     return userObject;

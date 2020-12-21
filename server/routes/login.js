@@ -12,7 +12,7 @@ const app = express();
 
 app.post( '/login', ( req, res ) => {
 
-    let body = req.body;
+    const body = req.body;
 
     User.findOne({ email: body.email }, ( err, userDB ) => {
         if ( err ) {
@@ -40,7 +40,7 @@ app.post( '/login', ( req, res ) => {
             });
         };
 
-        let token = jwt.sign({
+        const token = jwt.sign({
             user: userDB
         }, process.env.SEED, { expiresIn: process.env.TOKEN_EXPIRATION });
 
@@ -72,9 +72,9 @@ async function verify( token ) {
 
 app.post( '/google', async ( req, res ) => {
 
-    let token = req.body.idtoken;
+    const token = req.body.idtoken;
 
-    let googleUser = await verify( token )
+    const googleUser = await verify( token )
         .catch( e => {
             return res.status( 403 ).json({
                 ok: false,

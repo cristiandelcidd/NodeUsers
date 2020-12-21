@@ -26,7 +26,7 @@ const verifyToken = ( req, res, next ) => {
 
 const verifyAdminRole = ( req, res, next ) => {
 
-    let user = req.user;
+    const user = req.user;
 
     if ( user.role === 'ADMIN_ROLE' ) {
         next();
