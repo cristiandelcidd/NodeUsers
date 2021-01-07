@@ -6,7 +6,6 @@ const validsRoles = {
     message: '{VALUE} is not a valid role.'
 };
 
-// const { Schema } = mongoose;
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
@@ -39,6 +38,8 @@ const userSchema = new Schema({
         type: Boolean,
         default: false
     }
+}, {
+    versionKey: false
 });
 
 userSchema.methods.toJSON = function() {

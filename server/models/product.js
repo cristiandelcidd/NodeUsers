@@ -14,6 +14,10 @@ const productSchema = new Schema({
         type: String,
         required: false
     },
+    img: {
+        type: String,
+        required: false
+    },
     available: {
         type: Boolean,
         required: true,
@@ -28,6 +32,8 @@ const productSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User'
     }
+}, {
+    versionKey: false
 });
 
 module.exports = mongoose.model( 'Product', productSchema );

@@ -127,9 +127,9 @@ function productImage ( id, res, fileName ) {
             })
         }
 
-        deleteFile( productImage.img, 'products' );
+        deleteFile( productDB.img, 'products' );
 
-        productImage.img = fileName;
+        productDB.img = fileName;
 
         res.json({
             ok: true,

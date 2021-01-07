@@ -12,6 +12,8 @@ const schemaCategory = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User'
     }
+}, {
+    versionKey: false
 });
 
 module.exports = mongoose.model( 'Category', schemaCategory );
